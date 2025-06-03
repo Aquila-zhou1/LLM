@@ -99,22 +99,27 @@ def test_training_step():
         )
         
         # 创建优化器
+        print("==创建优化器==")
         optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
         criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
         
         # 测试一个训练步骤
+        print("==测试一个训练步骤==")
         batch = next(iter(train_loader))
         input_ids = batch['input_ids']
         
         # 构造输入和目标
+        print("==构造输入和目标==")
         inputs = input_ids[:, :-1]
         targets = input_ids[:, 1:]
         
         # 前向传播
+        print("==前向传播==")
         logits = model(inputs)
-        loss = criterion(logits.view(-1, logits.size(-1)), targets.view(-1))
+        loss = criterion(logits.reshape(-1, logits.size(-1)), targets.reshape(-1))
         
         # 反向传播
+        print("==反向传播==")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

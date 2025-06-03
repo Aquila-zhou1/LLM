@@ -339,16 +339,19 @@ def train_model(config: PretrainConfig, deepspeed_config: dict = None):
 
 def main():
     """主函数"""
+    print("==主函数==")
     parser = argparse.ArgumentParser(description='GPT预训练')
     parser.add_argument('--deepspeed_config', type=str, help='DeepSpeed配置文件路径')
     parser.add_argument('--output_dir', type=str, default='./outputs', help='输出目录')
     parser.add_argument('--batch_size', type=int, default=8, help='批量大小')
     parser.add_argument('--learning_rate', type=float, default=1e-4, help='学习率')
     parser.add_argument('--num_epochs', type=int, default=10, help='训练轮数')
-    
+    parser.add_argument('--local_rank', type=int, default=-1, help='local rank passed from DeepSpeed')
+
     args = parser.parse_args()
     
     # 创建配置
+    print("==创建配置==")
     config = PretrainConfig()
     config.output_dir = args.output_dir
     config.batch_size = args.batch_size
@@ -356,6 +359,7 @@ def main():
     config.num_epochs = args.num_epochs
     
     # 加载DeepSpeed配置
+    print("==加载DeepSpeed配置==")
     deepspeed_config = None
     if args.deepspeed_config and os.path.exists(args.deepspeed_config):
         with open(args.deepspeed_config, 'r') as f:
@@ -363,6 +367,7 @@ def main():
         logger.info(f"加载DeepSpeed配置: {args.deepspeed_config}")
     
     # 开始训练
+    print("==开始训练==")
     train_model(config, deepspeed_config)
 
 if __name__ == "__main__":
