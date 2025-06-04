@@ -6,6 +6,10 @@ from torch.distributed.elastic.agent.server.api import _get_socket_with_port
 
 Then add the following which I just lifted from old version of pytorch
 
+（/home/zhoutianyuan/miniconda3/envs/gpt-training/lib/python3.10/site-packages/deepspeed/elasticity/elastic_agent.py
+）
+
+# solving bugs of socket
 import socket
 def _get_socket_with_port() -> socket.socket:
     """Return a free port on localhost.
