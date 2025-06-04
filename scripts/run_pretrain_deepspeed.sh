@@ -28,7 +28,8 @@ OUTPUT_DIR="./outputs/pretrain_$(date +%Y%m%d_%H%M%S)"
 DEEPSPEED_CONFIG="./configs/ds_config_pretrain.json"
 BATCH_SIZE=8
 LEARNING_RATE=1e-4
-NUM_EPOCHS=10
+# NUM_EPOCHS=10 
+NUM_EPOCHS=1 # debugs
 
 echo "=== 训练配置 ==="
 echo "输出目录: $OUTPUT_DIR"

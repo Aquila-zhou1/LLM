@@ -36,9 +36,9 @@ class PretrainConfig:
     def __init__(self):
         # 模型配置
         self.vocab_size = 50257
-        self.hidden_size = 512
-        self.num_layers = 6
-        self.num_heads = 8
+        self.hidden_size = 2048
+        self.num_layers = 24
+        self.num_heads = 16
         self.max_seq_len = 1024
         self.dropout = 0.1
         
@@ -57,8 +57,8 @@ class PretrainConfig:
         self.save_interval = 1000 # 每1000步保存一次
         
         # 数据配置
-        self.num_workers = 0 # debugs
-        # self.num_workers = 4
+        # self.num_workers = 0 # debugs
+        self.num_workers = 4
         self.cache_dir = "./cache"
         
         # 输出配置

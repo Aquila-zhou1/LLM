@@ -110,12 +110,12 @@ def safe_collate_fn(batch: List[Optional[Dict[str, torch.Tensor]]]) -> Dict[str,
 
 
 def create_dataloaders(
-    batch_size: int = 8,
+    batch_size: int = 2,    # debug  元数据为8
     max_length: int = 1024,
     num_workers: int = 4,
     cache_dir: Optional[str] = None,
-    train_subset_size: Optional[int] = None,
-    val_subset_size: Optional[int] = None
+    train_subset_size: Optional[int] = 10240,
+    val_subset_size: Optional[int] = 10240   # debug
 ) -> tuple[DataLoader, DataLoader, GPT2Tokenizer]:
     """
     创建训练和验证数据加载器

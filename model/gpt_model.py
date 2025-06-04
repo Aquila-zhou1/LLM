@@ -161,9 +161,9 @@ class GPTSmall(nn.Module):
     def __init__(
         self,
         vocab_size: int = 50257,
-        hidden_size: int = 512,
-        num_layers: int = 6,
-        num_heads: int = 8,
+        hidden_size: int = 2048,
+        num_layers: int = 24,
+        num_heads: int = 16,
         max_seq_len: int = 1024,
         dropout: float = 0.1
     ):
