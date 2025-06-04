@@ -82,10 +82,32 @@ class TinyStoriesDataset(Dataset):
             return_tensors='pt'
         )
         
+        input_ids = encoded['input_ids'].squeeze(0)
+        attention_mask = encoded['attention_mask'].squeeze(0)
+        
+        # 添加防御性检查：如果是空样本，抛出异常
+        if input_ids.numel() == 0 or attention_mask.numel() == 0:
+            return None # 返回 None，后续在 collate_fn 里过滤掉
+
+    
+        
         return {
-            'input_ids': encoded['input_ids'].squeeze(0),
-            'attention_mask': encoded['attention_mask'].squeeze(0)
+            'input_ids': input_ids,
+            'attention_mask': attention_mask
         }
+
+def safe_collate_fn(batch: List[Optional[Dict[str, torch.Tensor]]]) -> Dict[str, torch.Tensor]:
+    # 去掉空样本（None）
+    batch = [x for x in batch if x is not None]
+    
+    if len(batch) == 0:
+        raise ValueError("整批数据都是无效样本（None），请检查数据或调小 batch size。")
+
+    return {
+        'input_ids': torch.stack([x['input_ids'] for x in batch]),
+        'attention_mask': torch.stack([x['attention_mask'] for x in batch])
+    }
+
 
 def create_dataloaders(
     batch_size: int = 8,
@@ -155,7 +177,8 @@ def create_dataloaders(
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
-        drop_last=True
+        drop_last=True,
+        collate_fn=safe_collate_fn
     )
     
     val_loader = DataLoader(
@@ -164,7 +187,8 @@ def create_dataloaders(
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
-        drop_last=False
+        drop_last=False,
+        collate_fn=safe_collate_fn
     )
     
     logger.info(f"训练数据加载器: {len(train_loader)}个批次")
