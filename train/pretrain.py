@@ -57,7 +57,8 @@ class PretrainConfig:
         self.save_interval = 1000 # 每1000步保存一次
         
         # 数据配置
-        self.num_workers = 4
+        self.num_workers = 0 # debugs
+        # self.num_workers = 4
         self.cache_dir = "./cache"
         
         # 输出配置
