@@ -69,7 +69,8 @@ class MultiHeadAttention(nn.Module):
         
         # 应用额外掩码（如padding掩码）
         if mask is not None:
-            att = att.masked_fill(~mask.unsqueeze(1).unsqueeze(1), float('-inf'))
+            att = att.masked_fill(~mask.bool().unsqueeze(1).unsqueeze(1), float('-inf'))
+
         
         # Softmax归一化
         att = F.softmax(att, dim=-1)

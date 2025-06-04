@@ -109,8 +109,8 @@ def evaluate_model(
             
             # 计算损失
             loss = nn.CrossEntropyLoss(ignore_index=-100)(
-                logits.view(-1, logits.size(-1)),
-                targets.view(-1)
+                logits.reshape(-1, logits.size(-1)),
+                targets.reshape(-1)
             )
             
             total_loss += loss.item()
@@ -252,8 +252,8 @@ def train_model(config: PretrainConfig, deepspeed_config: dict = None):
             
             # 计算损失
             loss = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)(
-                logits.view(-1, logits.size(-1)),
-                targets.view(-1)
+                logits.reshape(-1, logits.size(-1)),
+                targets.reshape(-1)
             )
             
             # 反向传播
