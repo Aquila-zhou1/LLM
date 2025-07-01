@@ -3,6 +3,11 @@
 # GPT预训练脚本 - DeepSpeed版本
 # 使用DeepSpeed进行分布式训练和内存优化
 
+# 设置一个新的端口避免冲突（如端口 25678）
+MASTER_PORT=25678
+export MASTER_PORT  # 设置MASTER_PORT环境变量
+
+
 echo "=== GPT预训练开始 ==="
 echo "时间: $(date)"
 echo "工作目录: $(pwd)"
@@ -20,16 +25,25 @@ nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nouni
 echo ""
 
 # 设置环境变量
-export CUDA_VISIBLE_DEVICES=0  # 使用第一张GPU
+export CUDA_VISIBLE_DEVICES=4,5,6,7  # 使用后四张GPU
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+echo "=== 当前使用的端口号 ==="
+echo "MASTER_PORT=$MASTER_PORT"
+echo ""
+
 
 # 训练参数
 OUTPUT_DIR="./outputs/pretrain_$(date +%Y%m%d_%H%M%S)"
 DEEPSPEED_CONFIG="./configs/ds_config_pretrain.json"
 BATCH_SIZE=8
 LEARNING_RATE=1e-4
-# NUM_EPOCHS=10 
+# NUM_EPOCHS=10
 NUM_EPOCHS=1 # debugs
+
+# wandb参数
+USE_WANDB=true
+WANDB_PROJECT="gpt-pretrain"
+WANDB_RUN_NAME="deepspeed-$(date +%Y%m%d_%H%M%S)"
 
 echo "=== 训练配置 ==="
 echo "输出目录: $OUTPUT_DIR"
@@ -37,6 +51,9 @@ echo "DeepSpeed配置: $DEEPSPEED_CONFIG"
 echo "批量大小: $BATCH_SIZE"
 echo "学习率: $LEARNING_RATE"
 echo "训练轮数: $NUM_EPOCHS"
+echo "使用wandb: $USE_WANDB"
+echo "wandb项目: $WANDB_PROJECT"
+echo "wandb运行名: $WANDB_RUN_NAME"
 echo ""
 
 # 创建输出目录
@@ -95,15 +112,24 @@ echo ""
 
 # 开始训练
 echo "=== 开始DeepSpeed训练 ==="
-echo "命令: deepspeed train/pretrain.py --deepspeed_config $DEEPSPEED_CONFIG --output_dir $OUTPUT_DIR --batch_size $BATCH_SIZE --learning_rate $LEARNING_RATE --num_epochs $NUM_EPOCHS"
+
+# 构建wandb参数
+WANDB_ARGS=""
+if [[ "$USE_WANDB" == "true" ]]; then
+    WANDB_ARGS="--use_wandb --wandb_project $WANDB_PROJECT --wandb_run_name $WANDB_RUN_NAME"
+fi
+
+echo "命令: torchrun --nproc_per_node=4 --nnodes=1 --node_rank=0 train/pretrain.py --deepspeed_config $DEEPSPEED_CONFIG --output_dir $OUTPUT_DIR --batch_size $BATCH_SIZE --learning_rate $LEARNING_RATE --num_epochs $NUM_EPOCHS $WANDB_ARGS"
 echo ""
 
-deepspeed train/pretrain.py \
+torchrun --nproc_per_node=4 --nnodes=1 --node_rank=0 train/pretrain.py \
     --deepspeed_config "$DEEPSPEED_CONFIG" \
     --output_dir "$OUTPUT_DIR" \
     --batch_size "$BATCH_SIZE" \
     --learning_rate "$LEARNING_RATE" \
-    --num_epochs "$NUM_EPOCHS"
+    --num_epochs "$NUM_EPOCHS" \
+    $WANDB_ARGS
+
 
 # 检查训练结果
 if [[ $? -eq 0 ]]; then

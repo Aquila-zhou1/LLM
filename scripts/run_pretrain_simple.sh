@@ -33,11 +33,19 @@ BATCH_SIZE=4  # 简单版本使用较小的批量大小
 LEARNING_RATE=1e-4
 NUM_EPOCHS=3  # 简单版本使用较少的轮数进行测试
 
+# wandb参数
+USE_WANDB=true
+WANDB_PROJECT="gpt-pretrain"
+WANDB_RUN_NAME="simple-$(date +%Y%m%d_%H%M%S)"
+
 echo "=== 训练配置 ==="
 echo "输出目录: $OUTPUT_DIR"
 echo "批量大小: $BATCH_SIZE"
 echo "学习率: $LEARNING_RATE"
 echo "训练轮数: $NUM_EPOCHS"
+echo "使用wandb: $USE_WANDB"
+echo "wandb项目: $WANDB_PROJECT"
+echo "wandb运行名: $WANDB_RUN_NAME"
 echo ""
 
 # 创建输出目录
@@ -95,14 +103,22 @@ echo ""
 
 # 开始训练
 echo "=== 开始简单训练 ==="
-echo "命令: python train/pretrain.py --output_dir $OUTPUT_DIR --batch_size $BATCH_SIZE --learning_rate $LEARNING_RATE --num_epochs $NUM_EPOCHS"
+
+# 构建wandb参数
+WANDB_ARGS=""
+if [[ "$USE_WANDB" == "true" ]]; then
+    WANDB_ARGS="--use_wandb --wandb_project $WANDB_PROJECT --wandb_run_name $WANDB_RUN_NAME"
+fi
+
+echo "命令: python train/pretrain.py --output_dir $OUTPUT_DIR --batch_size $BATCH_SIZE --learning_rate $LEARNING_RATE --num_epochs $NUM_EPOCHS $WANDB_ARGS"
 echo ""
 
 python train/pretrain.py \
     --output_dir "$OUTPUT_DIR" \
     --batch_size "$BATCH_SIZE" \
     --learning_rate "$LEARNING_RATE" \
-    --num_epochs "$NUM_EPOCHS"
+    --num_epochs "$NUM_EPOCHS" \
+    $WANDB_ARGS
 
 # 检查训练结果
 if [[ $? -eq 0 ]]; then

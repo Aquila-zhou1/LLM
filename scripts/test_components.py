@@ -20,8 +20,8 @@ def test_data_loader():
     """测试数据加载器"""
     logger.info("=== 测试数据加载器 ===")
     try:
-        from data.tinystories_loader import create_dataloaders
-        
+        from data.tinystories_loader import create_dataloaders, verify_data_integrity
+
         # 创建小规模数据加载器
         train_loader, val_loader, tokenizer = create_dataloaders(
             batch_size=2,
@@ -30,13 +30,29 @@ def test_data_loader():
             train_subset_size=10,
             val_subset_size=5
         )
-        
+
         # 测试一个批次
         batch = next(iter(train_loader))
-        logger.info(f"✓ 数据加载器测试通过")
+        logger.info(f"✓ 数据加载器基本测试通过")
         logger.info(f"  批次形状: {batch['input_ids'].shape}")
         logger.info(f"  分词器词表大小: {len(tokenizer)}")
-        
+
+        # 验证数据完整性（注释掉以减少输出）
+        # logger.info("进行数据完整性验证...")
+        # verify_data_integrity(train_loader, val_loader, tokenizer, num_samples=2)
+
+        # 验证token化正确性（简化输出）
+        logger.info("验证token化正确性...")
+        sample_input = batch['input_ids'][0]
+        decoded_text = tokenizer.decode(sample_input, skip_special_tokens=True)
+        logger.info(f"  解码文本示例: {decoded_text[:100]}...")
+
+        # 检查语言建模数据格式
+        inputs = sample_input[:-1]
+        targets = sample_input[1:]
+        logger.info(f"  输入序列长度: {len(inputs)}")
+        logger.info(f"  目标序列长度: {len(targets)}")
+
         return True
     except Exception as e:
         logger.error(f"✗ 数据加载器测试失败: {e}")
