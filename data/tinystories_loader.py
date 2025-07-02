@@ -110,12 +110,12 @@ def safe_collate_fn(batch: List[Optional[Dict[str, torch.Tensor]]]) -> Dict[str,
 
 
 def create_dataloaders(
-    batch_size: int = 2,    # debug  元数据为8
+    batch_size: int = 8,    # debug  元数据为8
     max_length: int = 1024,
     num_workers: int = 4,
     cache_dir: Optional[str] = None,
-    train_subset_size: Optional[int] = 10240,
-    val_subset_size: Optional[int] = 10240   # debug
+    train_subset_size: Optional[int] = None, # 10240,
+    val_subset_size: Optional[int] = None # 10240   # debug
 ) -> tuple[DataLoader, DataLoader, GPT2Tokenizer]:
     """
     创建训练和验证数据加载器
@@ -196,10 +196,83 @@ def create_dataloaders(
     
     return train_loader, val_loader, tokenizer
 
+def verify_data_integrity(
+    train_loader,
+    val_loader,
+    tokenizer,
+    num_samples: int = 3
+):
+    """
+    验证数据完整性，检查token化和解码是否正确
+
+    Args:
+        train_loader: 训练数据加载器
+        val_loader: 验证数据加载器
+        tokenizer: 分词器
+        num_samples: 验证的样本数量
+    """
+    logger.info("=== 开始数据完整性验证 ===")
+
+    # 验证训练集
+    logger.info("验证训练集数据...")
+    train_iter = iter(train_loader)
+    for i in range(min(num_samples, len(train_loader))):
+        batch = next(train_iter)
+        logger.info(f"\n--- 训练样本 {i+1} ---")
+
+        # 获取第一个样本
+        input_ids = batch['input_ids'][0]
+        attention_mask = batch['attention_mask'][0]
+
+        logger.info(f"Token序列长度: {len(input_ids)}")
+        logger.info(f"有效token数量: {attention_mask.sum().item()}")
+
+        # 解码完整文本
+        full_text = tokenizer.decode(input_ids, skip_special_tokens=True)
+        logger.info(f"解码文本长度: {len(full_text)} 字符")
+        logger.info(f"解码文本预览: {full_text[:200]}...")
+
+        # 检查特殊token
+        special_tokens = []
+        for token_id in input_ids[:20]:  # 检查前20个token
+            if token_id.item() in [tokenizer.pad_token_id, tokenizer.eos_token_id, tokenizer.bos_token_id]:
+                token_name = tokenizer.decode([token_id.item()])
+                special_tokens.append(f"{token_id.item()}({token_name})")
+
+        if special_tokens:
+            logger.info(f"前20个token中的特殊token: {special_tokens}")
+
+        # 验证token范围
+        min_token = input_ids.min().item()
+        max_token = input_ids.max().item()
+        logger.info(f"Token ID范围: {min_token} - {max_token}")
+
+        if max_token >= tokenizer.vocab_size:
+            logger.warning(f"发现超出词表范围的token: {max_token} >= {tokenizer.vocab_size}")
+
+    # 验证验证集
+    logger.info("\n验证验证集数据...")
+    val_iter = iter(val_loader)
+    for i in range(min(num_samples, len(val_loader))):
+        batch = next(val_iter)
+        logger.info(f"\n--- 验证样本 {i+1} ---")
+
+        input_ids = batch['input_ids'][0]
+        attention_mask = batch['attention_mask'][0]
+
+        logger.info(f"Token序列长度: {len(input_ids)}")
+        logger.info(f"有效token数量: {attention_mask.sum().item()}")
+
+        # 解码文本
+        full_text = tokenizer.decode(input_ids, skip_special_tokens=True)
+        logger.info(f"解码文本预览: {full_text[:200]}...")
+
+    logger.info("\n=== 数据完整性验证完成 ===")
+
 def test_dataloader():
     """测试数据加载器功能"""
     logger.info("开始测试数据加载器...")
-    
+
     # 创建小规模数据加载器进行测试
     train_loader, val_loader, tokenizer = create_dataloaders(
         batch_size=2,
@@ -207,21 +280,24 @@ def test_dataloader():
         train_subset_size=10,
         val_subset_size=5
     )
-    
+
     # 测试训练数据加载器
     logger.info("测试训练数据加载器...")
     for i, batch in enumerate(train_loader):
         logger.info(f"批次 {i+1}:")
         logger.info(f"  input_ids shape: {batch['input_ids'].shape}")
         logger.info(f"  attention_mask shape: {batch['attention_mask'].shape}")
-        
+
         # 解码第一个样本查看内容
         sample_text = tokenizer.decode(batch['input_ids'][0], skip_special_tokens=True)
         logger.info(f"  样本文本预览: {sample_text[:100]}...")
-        
+
         if i >= 1:  # 只测试前2个批次
             break
-    
+
+    # 进行数据完整性验证（注释掉以减少输出）
+    # verify_data_integrity(train_loader, val_loader, tokenizer, num_samples=2)
+
     logger.info("数据加载器测试完成！")
 
 if __name__ == "__main__":
