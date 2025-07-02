@@ -3,9 +3,9 @@
 </div>
 
 
-<div align="center">
-中文 | [English](.\README_en.md)
-</div>
+<p align="center">
+  中文 | <a href="./README_en.md">English</a>
+</p>
 
 <div align="center">
 221900448 周天远

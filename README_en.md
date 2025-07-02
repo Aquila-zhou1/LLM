@@ -2,9 +2,9 @@
   <h1>Natural Language Processing Project</h1>
 </div>
 
-<div align="center">
-[中文](.\README.md) | English
-</div>
+<p align="center">
+  <a href="./README_en.md">中文</a> | English
+</p>
 
 <div align="center">
 221900448 Martin Zhou
