@@ -38,22 +38,22 @@
 ### 预训练阶段
 
 - **训练集表现**
-   ![img](.\images\1-1.png)
+   ![img](./images/1-1.png)
 - **验证集表现**
-   ![img](.\images\1-2.png)
+   ![img](./images/1-2.png)
 
 ### 监督微调结果
 
-![img](.\images\2.png)
+![img](./images/2.png)
 
 ### LoRA 微调结果
 
-![img](.\images\3.png)
+![img](./images/3.png)
 
 ### RLHF 阶段结果
 
-![img](.\images\4.png)
+![img](./images/4.png)
 
 ### 推理模型训练结果
 
-![](.\images\5.png)
+![](./images/5.png)
