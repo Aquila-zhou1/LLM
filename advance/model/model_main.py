@@ -6,7 +6,7 @@ from transformers import PretrainedConfig
 
 
 class MainConfig(PretrainedConfig):
-    model_type = "minimind"
+    model_type = "main"
 
     def __init__(
             self,
