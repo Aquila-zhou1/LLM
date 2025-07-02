@@ -1,6 +1,15 @@
-# 自然语言处理大项目
+<div align="center">
+  <h1>自然语言处理大项目</h1>
+</div>
 
+
+<div align="center">
+中文 | [English](./README_en.md)
+</div>
+
+<div align="center">
 221900448 周天远
+</div>
 
 ## 项目简述
 
